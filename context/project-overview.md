@@ -540,8 +540,8 @@ Shared collections, teams/organizations, VS Code extension, browser extension, a
 
 Refer to the screenshots below as a base for the dashboard UI. It does not have to be exact. Use it as a reference:
 
-@context/screenshots/devstash_dashboard_ui_main.png
-@context/screenshots/devstash_ui_drawer.png
+@context/screenshots/dashboard-ui-main.png
+@context/screenshots/dashboard-ui-drawer.png
 
 ### Course workflow
 
