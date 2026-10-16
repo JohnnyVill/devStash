@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Archive, Boxes, Clock3, Code2, File, Image, Inbox, LayoutGrid, Link2, List, PanelLeft, Plus, Search, Sparkles, Star, StickyNote, Terminal, X, type LucideIcon } from "lucide-react";
 import { Dialog } from "radix-ui";
+import Link from "next/link";
 import { COLLECTIONS, CURRENT_USER, ITEMS, ITEM_TYPES } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,27 +11,49 @@ import { Input } from "@/components/ui/input";
 const ICONS: Record<string, LucideIcon> = { snippet: Code2, prompt: Sparkles, note: StickyNote, command: Terminal, file: File, image: Image, url: Link2 };
 const COLORS: Record<string, string> = { snippet: "border-blue-400/60 text-blue-400", prompt: "border-yellow-400/60 text-yellow-400", note: "border-violet-400/60 text-violet-400", command: "border-cyan-400/60 text-cyan-400", file: "border-emerald-400/60 text-emerald-400", image: "border-orange-400/60 text-orange-400", url: "border-pink-400/60 text-pink-400" };
 
+// Collections do not have usage timestamps; use their most recently used item.
+const recentCollections = COLLECTIONS.map(collection => ({
+  ...collection,
+  lastUsedAt: ITEMS.filter(item => item.collectionId === collection.id)
+    .reduce((latest, item) => (item.lastUsedAt ?? "") > latest ? item.lastUsedAt! : latest, ""),
+})).filter(collection => collection.lastUsedAt)
+  .sort((a, b) => b.lastUsedAt.localeCompare(a.lastUsedAt));
+
+interface NavigationEntry {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  count?: number;
+  href?: string;
+}
+
 interface SidebarProps { filter: string; onSelect: (filter: string) => void }
 function Sidebar({ filter, onSelect }: SidebarProps) {
-  const groups = [
+  const groups: { title: string; entries: NavigationEntry[] }[] = [
     { title: "Workspace", entries: [{ id: "all", name: "All items", icon: Boxes, count: ITEMS.length }, { id: "inbox", name: "Inbox", icon: Inbox, count: ITEMS.filter(i => !i.collectionId).length }, { id: "favorites", name: "Favorites", icon: Star, count: ITEMS.filter(i => i.isFavorite).length }, { id: "recent", name: "Recently used", icon: Clock3 }] },
     { title: "Favorite collections", entries: COLLECTIONS.filter(c => c.isFavorite).map(c => ({ ...c, icon: Star })) },
-    { title: "Collections", entries: COLLECTIONS.map(c => ({ ...c, icon: Boxes, count: ITEMS.filter(i => i.collectionId === c.id).length })) },
-    { title: "Types", entries: ITEM_TYPES.map(t => ({ id: t.id, name: `${t.name}s`, icon: ICONS[t.id] })) },
+    { title: "Recent collections", entries: recentCollections.map(c => ({ ...c, icon: Clock3, count: ITEMS.filter(i => i.collectionId === c.id).length })) },
+    { title: "Types", entries: ITEM_TYPES.map(t => ({ id: t.id, name: `${t.name}s`, icon: ICONS[t.id], href: `/items/${t.name.toLowerCase()}s`, count: ITEMS.filter(item => item.typeId === t.id).length })) },
   ];
   return <div className="flex h-full flex-col">
-    <a href="/dashboard" className="flex h-16 shrink-0 items-center gap-3 border-b px-5 text-sm font-semibold"><span className="flex size-8 items-center justify-center rounded-lg bg-primary"><Archive className="size-4" /></span>DevStash</a>
-    <nav aria-label="Workspace navigation" className="flex-1 space-y-6 overflow-y-auto px-3 py-4">{groups.map(group => <div key={group.title}>{group.title !== "Workspace" && <h2 className="mb-2 px-3 text-[10px] tracking-widest text-muted-foreground uppercase">{group.title}</h2>}<div className="space-y-1">{group.entries.map(entry => <button key={entry.id} onClick={() => onSelect(entry.id)} aria-current={filter === entry.id ? "page" : undefined} className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-xs transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-ring ${filter === entry.id ? "bg-white/8 text-white" : "text-muted-foreground"}`}><entry.icon className={`size-4 shrink-0 ${COLORS[entry.id] ?? ""}`} /><span className="flex-1 truncate">{entry.name}</span>{"count" in entry && <span className="text-[10px] text-muted-foreground">{entry.count}</span>}</button>)}</div></div>)}</nav>
-    <div className="flex items-center gap-3 border-t p-4"><Avatar /><div><p className="text-xs font-medium">{CURRENT_USER.name}</p><p className="mt-1 text-[10px] text-muted-foreground">Free workspace</p></div></div>
+    <Link href="/dashboard" className="flex h-16 shrink-0 items-center gap-3 border-b px-5 text-sm font-semibold"><span className="flex size-8 items-center justify-center rounded-lg bg-primary"><Archive className="size-4" /></span>DevStash</Link>
+    <nav aria-label="Workspace navigation" className="flex-1 space-y-6 overflow-y-auto px-3 py-4">{groups.map(group => <div key={group.title}>{group.title !== "Workspace" && <h2 className="mb-2 px-3 text-[10px] tracking-widest text-muted-foreground uppercase">{group.title}</h2>}<div className="space-y-1">{group.entries.map(entry => {
+      const className = `flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-xs transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-ring ${filter === entry.id ? "bg-white/8 text-white" : "text-muted-foreground"}`;
+      const content = <><entry.icon aria-hidden="true" className={`size-4 shrink-0 ${COLORS[entry.id] ?? ""}`} /><span className="flex-1 truncate">{entry.name}</span>{entry.count !== undefined && <span className="text-[10px] text-muted-foreground">{entry.count}</span>}</>;
+      return entry.href ? <Link key={entry.id} href={entry.href} onClick={() => onSelect(entry.id)} aria-current={filter === entry.id ? "page" : undefined} className={className}>{content}</Link> : <button key={entry.id} onClick={() => onSelect(entry.id)} aria-current={filter === entry.id ? "page" : undefined} className={className}>{content}</button>;
+    })}</div></div>)}</nav>
+    <div className="flex items-center gap-3 border-t p-4"><Avatar /><div><p className="text-xs font-medium">{CURRENT_USER.name}</p><p className="mt-1 text-[10px] text-muted-foreground">{CURRENT_USER.plan === "pro" ? "Pro" : "Free"} workspace</p></div></div>
   </div>;
 }
 function Avatar() { return <span aria-label={CURRENT_USER.name} className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[10px] font-semibold">{CURRENT_USER.initials}</span>; }
 
-export function Dashboard() {
+interface DashboardProps { initialFilter?: string }
+
+export function Dashboard({ initialFilter = "all" }: DashboardProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(initialFilter);
   const [list, setList] = useState(false);
   const [sort, setSort] = useState("updated");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -38,6 +61,12 @@ export function Dashboard() {
     function handleKey(event: KeyboardEvent) { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); searchRef.current?.focus(); } }
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const closeDrawer = () => { if (desktop.matches) setMobileOpen(false); };
+    desktop.addEventListener("change", closeDrawer);
+    return () => desktop.removeEventListener("change", closeDrawer);
   }, []);
   const select = (value: string) => { setFilter(value); setMobileOpen(false); };
   const visible = ITEMS.filter(item => {
@@ -48,11 +77,11 @@ export function Dashboard() {
   const stats = [{ label: "Total items", value: ITEMS.length, icon: Boxes, caption: "In your workspace" }, { label: "Collections", value: COLLECTIONS.length, icon: Archive, caption: "Ideas, organized" }, { label: "Favorite items", value: ITEMS.filter(i => i.isFavorite).length, icon: Star, caption: "Always close at hand" }, { label: "Favorite collections", value: COLLECTIONS.filter(c => c.isFavorite).length, icon: Star, caption: "Your go-to collections" }];
   return <div className="flex min-h-dvh w-full min-w-0">
     <a href="#main-content" className="sr-only z-50 rounded bg-primary p-3 focus:not-sr-only focus:fixed">Skip to main content</a>
-    {!collapsed && <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 border-r bg-sidebar md:block"><Sidebar filter={filter} onSelect={select} /></aside>}
+    {!collapsed && <aside id="desktop-sidebar" className="sticky top-0 hidden h-dvh w-60 shrink-0 border-r bg-sidebar md:block"><Sidebar filter={filter} onSelect={select} /></aside>}
     <div className="min-w-0 flex-1">
       <header className="flex h-16 items-center gap-3 border-b px-4 sm:px-6">
-        <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!collapsed} className="hidden text-muted-foreground md:inline-flex"><PanelLeft /></Button>
-        <Dialog.Root open={mobileOpen} onOpenChange={setMobileOpen}><Dialog.Trigger asChild><Button variant="ghost" size="icon" aria-label="Open navigation" className="md:hidden"><PanelLeft /></Button></Dialog.Trigger><Dialog.Portal><Dialog.Overlay className="fixed inset-0 z-40 bg-black/70 md:hidden" /><Dialog.Content className="fixed inset-y-0 left-0 z-50 w-72 border-r bg-sidebar md:hidden"><Dialog.Title className="sr-only">Workspace navigation</Dialog.Title><Dialog.Description className="sr-only">Browse items, collections, and types.</Dialog.Description><Dialog.Close asChild><Button variant="ghost" size="icon" aria-label="Close navigation" className="absolute top-4 right-3"><X /></Button></Dialog.Close><Sidebar filter={filter} onSelect={select} /></Dialog.Content></Dialog.Portal></Dialog.Root>
+        <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!collapsed} aria-controls={collapsed ? undefined : "desktop-sidebar"} className="hidden text-muted-foreground md:inline-flex"><PanelLeft /></Button>
+        <Dialog.Root open={mobileOpen} onOpenChange={setMobileOpen}><Dialog.Trigger asChild><Button variant="ghost" size="icon" aria-label="Open navigation" className="md:hidden"><PanelLeft /></Button></Dialog.Trigger><Dialog.Portal><Dialog.Overlay className="fixed inset-0 z-40 bg-black/70 md:hidden" /><Dialog.Content className="fixed inset-y-0 left-0 z-50 w-72 max-w-[calc(100%-2rem)] border-r bg-sidebar md:hidden"><Dialog.Title className="sr-only">Workspace navigation</Dialog.Title><Dialog.Description className="sr-only">Browse items, collections, and types.</Dialog.Description><Dialog.Close asChild><Button variant="ghost" size="icon" aria-label="Close navigation" className="absolute top-4 right-3"><X /></Button></Dialog.Close><Sidebar filter={filter} onSelect={select} /></Dialog.Content></Dialog.Portal></Dialog.Root>
         <div className="relative max-w-md min-w-0 flex-1"><Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" /><Input ref={searchRef} type="search" placeholder="Search your stash..." aria-label="Search your stash" value={query} onChange={event => setQuery(event.target.value)} className="h-10 bg-white/3 pl-9 sm:pr-24" /><kbd className="pointer-events-none absolute top-3 right-3 hidden rounded border px-1 text-[10px] text-muted-foreground sm:block">Ctrl / ⌘ K</kbd></div><div className="ml-auto"><Avatar /></div>
       </header>
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-5 py-9 outline-none sm:px-8 lg:px-12 lg:py-12">
