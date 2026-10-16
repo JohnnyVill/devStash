@@ -45,7 +45,7 @@ export interface Item {
 export const CURRENT_USER: User = {
   id: "user-jordan",
   name: "Jordan Davis",
-  email: "jordan@example.com",
+  email: "dev@devstash.io",
   initials: "JD",
   plan: "free",
   storageUsedBytes: 1_900_000_000,
@@ -53,30 +53,98 @@ export const CURRENT_USER: User = {
 };
 
 export const ITEM_TYPES: ItemType[] = [
-  { id: "snippet", name: "Snippet", icon: "Code2", color: "#3b82f6", contentKind: "TEXT" },
-  { id: "prompt", name: "Prompt", icon: "Sparkles", color: "#eab308", contentKind: "TEXT" },
-  { id: "note", name: "Note", icon: "StickyNote", color: "#a78bfa", contentKind: "TEXT" },
-  { id: "command", name: "Command", icon: "Terminal", color: "#06b6d4", contentKind: "TEXT" },
-  { id: "file", name: "File", icon: "File", color: "#10b981", contentKind: "FILE" },
-  { id: "image", name: "Image", icon: "Image", color: "#f97316", contentKind: "FILE" },
-  { id: "url", name: "Link", icon: "Link", color: "#ec4899", contentKind: "URL" },
+  {
+    id: "snippet",
+    name: "Snippet",
+    icon: "Code2",
+    color: "#3b82f6",
+    contentKind: "TEXT",
+  },
+  {
+    id: "prompt",
+    name: "Prompt",
+    icon: "Sparkles",
+    color: "#eab308",
+    contentKind: "TEXT",
+  },
+  {
+    id: "note",
+    name: "Note",
+    icon: "StickyNote",
+    color: "#a78bfa",
+    contentKind: "TEXT",
+  },
+  {
+    id: "command",
+    name: "Command",
+    icon: "Terminal",
+    color: "#06b6d4",
+    contentKind: "TEXT",
+  },
+  {
+    id: "file",
+    name: "File",
+    icon: "File",
+    color: "#10b981",
+    contentKind: "FILE",
+  },
+  {
+    id: "image",
+    name: "Image",
+    icon: "Image",
+    color: "#f97316",
+    contentKind: "FILE",
+  },
+  {
+    id: "url",
+    name: "Link",
+    icon: "Link",
+    color: "#ec4899",
+    contentKind: "URL",
+  },
 ];
 
 export const COLLECTIONS: Collection[] = [
-  { id: "react-patterns", name: "React Patterns", description: "Reusable React patterns and notes.", color: "#a78bfa", isFavorite: true },
-  { id: "ai-prompts", name: "AI Prompts", description: "Prompts for everyday development tasks.", color: "#eab308", isFavorite: false },
-  { id: "terminal-commands", name: "Terminal Commands", description: "Useful commands for local development.", color: "#06b6d4", isFavorite: false },
-  { id: "reading-list", name: "Reading List", description: "Articles and references to revisit.", color: "#ec4899", isFavorite: false },
+  {
+    id: "react-patterns",
+    name: "React Patterns",
+    description: "Reusable React patterns and notes.",
+    color: "#a78bfa",
+    isFavorite: true,
+  },
+  {
+    id: "ai-prompts",
+    name: "AI Prompts",
+    description: "Prompts for everyday development tasks.",
+    color: "#eab308",
+    isFavorite: false,
+  },
+  {
+    id: "terminal-commands",
+    name: "Terminal Commands",
+    description: "Useful commands for local development.",
+    color: "#06b6d4",
+    isFavorite: false,
+  },
+  {
+    id: "reading-list",
+    name: "Reading List",
+    description: "Articles and references to revisit.",
+    color: "#ec4899",
+    isFavorite: false,
+  },
 ];
 
 export const ITEMS: Item[] = [
   {
     id: "react-server-components",
     title: "React Server Components",
-    description: "A practical checklist for deciding when to use server and client components.",
+    description:
+      "A practical checklist for deciding when to use server and client components.",
     typeId: "note",
     collectionId: "react-patterns",
-    content: "Use Server Components for data fetching and server-only logic. Use Client Components for state, event handlers, and browser APIs.",
+    content:
+      "Use Server Components for data fetching and server-only logic. Use Client Components for state, event handlers, and browser APIs.",
     tags: ["react", "nextjs"],
     isFavorite: true,
     isPinned: true,
@@ -87,10 +155,12 @@ export const ITEMS: Item[] = [
   {
     id: "review-pr-security",
     title: "Review PR for security issues",
-    description: "Review this pull request for auth, validation, and data exposure risks.",
+    description:
+      "Review this pull request for auth, validation, and data exposure risks.",
     typeId: "prompt",
     collectionId: "ai-prompts",
-    content: "Review the following pull request for authentication, authorization, input validation, and data exposure risks. Explain each finding and suggest a fix.\n\n[Paste diff here]",
+    content:
+      "Review the following pull request for authentication, authorization, input validation, and data exposure risks. Explain each finding and suggest a fix.\n\n[Paste diff here]",
     tags: ["code-review", "security"],
     isFavorite: false,
     isPinned: false,
@@ -101,7 +171,8 @@ export const ITEMS: Item[] = [
   {
     id: "docker-compose-up",
     title: "Docker compose up",
-    description: "Start local services in the background and rebuild changed images.",
+    description:
+      "Start local services in the background and rebuild changed images.",
     typeId: "command",
     collectionId: "terminal-commands",
     content: "docker compose up -d --build",
@@ -116,10 +187,12 @@ export const ITEMS: Item[] = [
   {
     id: "use-debounce-hook",
     title: "useDebounce hook",
-    description: "A small, typed debounce hook for search inputs and expensive requests.",
+    description:
+      "A small, typed debounce hook for search inputs and expensive requests.",
     typeId: "snippet",
     collectionId: "react-patterns",
-    content: 'import { useEffect, useState } from "react";\n\nexport function useDebounce<T>(value: T, delay = 300): T {\n  const [debouncedValue, setDebouncedValue] = useState(value);\n\n  useEffect(() => {\n    const timer = setTimeout(() => setDebouncedValue(value), delay);\n    return () => clearTimeout(timer);\n  }, [value, delay]);\n\n  return debouncedValue;\n}',
+    content:
+      'import { useEffect, useState } from "react";\n\nexport function useDebounce<T>(value: T, delay = 300): T {\n  const [debouncedValue, setDebouncedValue] = useState(value);\n\n  useEffect(() => {\n    const timer = setTimeout(() => setDebouncedValue(value), delay);\n    return () => clearTimeout(timer);\n  }, [value, delay]);\n\n  return debouncedValue;\n}',
     language: "typescript",
     tags: ["hooks", "typescript"],
     isFavorite: false,
@@ -131,7 +204,8 @@ export const ITEMS: Item[] = [
   {
     id: "the-changelog",
     title: "The Changelog",
-    description: "Product updates, engineering notes, and thoughtful writing from Linear.",
+    description:
+      "Product updates, engineering notes, and thoughtful writing from Linear.",
     typeId: "url",
     collectionId: "reading-list",
     content: "",
@@ -146,10 +220,12 @@ export const ITEMS: Item[] = [
   {
     id: "api-error-handling",
     title: "API error handling",
-    description: "Patterns for returning consistent errors from route handlers.",
+    description:
+      "Patterns for returning consistent errors from route handlers.",
     typeId: "snippet",
     collectionId: null,
-    content: 'return Response.json(\n  { error: { code: "NOT_FOUND", message: "Item not found." } },\n  { status: 404 },\n);',
+    content:
+      'return Response.json(\n  { error: { code: "NOT_FOUND", message: "Item not found." } },\n  { status: 404 },\n);',
     language: "typescript",
     tags: ["api", "nextjs"],
     isFavorite: false,

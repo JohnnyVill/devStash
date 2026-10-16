@@ -1,20 +1,17 @@
-# Current Feature
+﻿# Current Feature
 
-Dashboard mock data: a single importable data file for the current user, item types, collections, and items.
+<!-- Feature name and short description -->
 
 ## Status
 
-Completed
+<!-- Not Started | In Progress | Completed -->
 
 ## Goals
 
-- Add `src/lib/mock-data.ts` with simple typed data and no helper methods.
-- Use the dashboard screenshot as the reference for sample content.
-
-## Notes
-
-Counts should be derived from the sample items rather than copying the screenshot's placeholder totals.
-
 ## History
 
+- 2026-10-16: Built screenshot-inspired dashboard shell on feature/dashboard-shell. Added desktop sidebar, accessible mobile drawer, user area, searchable mock item cards, statistics, sorting, and grid/list views. ESLint and production build passed; desktop and narrow layouts visually checked in headless Chrome. Uses local mock data; creation and persistence remain deferred.
+
+- 2026-10-16: Implemented Dashboard UI Phase 1 on `feature/dashboard-phase-1`: initialized shadcn/ui, installed Button and Input, added `/dashboard` with a responsive dark shell, display-only top bar, and sidebar/main placeholders. Production build and ESLint passed; verified HTTP 200 and desktop/mobile layouts in headless Chrome.
+- 2026-10-16: Started Dashboard UI Phase 1 from the phase 1 specification.
 - 2026-10-16: Added typed dashboard mock data. Production build and ESLint passed. No UI changes were needed.
