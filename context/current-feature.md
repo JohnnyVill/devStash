@@ -6,6 +6,12 @@
 
 ## History
 
+- 2026-10-16: Archived **Dashboard UI Phase 3** — Build the dashboard main area using the existing mock data. Status: Completed. Specification: [Dashboard UI Phase 3](features/dashboard-phase-3-spec.md). Goals: main area to the right of the sidebar; recent collections; pinned items; 10 recent items; four stats cards for item count, collection count, favorite items, and favorite collections.
+
+- 2026-10-16: Completed Dashboard UI Phase 3 on `feature/dashboard-phase-3`. Added recent collection cards, a pinned-items section, and up to 10 recently updated items alongside the four existing stats cards. Reused item cards and preserved search, collection/type filters, sorting, grid/list views, and mobile navigation. ESLint and production build passed. Chrome verified desktop and 390px/320px layouts and interactions; temporary render checks verified the newest-10 limit with 14 items and empty-workspace/no-pins states. Existing mock data remains unchanged and contains six items.
+
+- 2026-10-16: Started Dashboard UI Phase 3 from [the phase 3 specification](features/dashboard-phase-3-spec.md).
+
 - 2026-10-16: Archived **Dashboard UI Phase 2** — Build the dashboard sidebar and responsive drawer using the existing mock data. Status: Completed. Specification: [Dashboard UI Phase 2](features/dashboard-phase-2-spec.md). Goals: collapsible sidebar; item-type links to `/items/TYPE` (for example, `/items/snippets`); favorite and most recent collections; user avatar area at the bottom; drawer icon to open and close the sidebar; always use a drawer on mobile.
 
 - 2026-10-16: Fixed the default home URL showing only the original DevStash placeholder by redirecting `/` to `/dashboard`. Verified the running development server returns a 307 redirect and the dashboard renders successfully. ESLint and production build passed.
