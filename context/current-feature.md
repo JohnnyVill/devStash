@@ -1,10 +1,28 @@
 ﻿# Current Feature
 
+## Development and Demo Seed Data
+
+Specification: [Seed data requirements](features/seed-spec.md).
+
 ## Status
+
+Completed
 
 ## Goals
 
+- Replace `prisma/seed.ts` with a development/demo seed script following the specification, using Prisma 7 and dotenv for database configuration.
+- Create **Demo User** (`demo@devstash.io`) with password `12345678` hashed using `bcryptjs` with 12 rounds, the current date as `emailVerified`, and Free access.
+- Seed all seven system item types with the names, Lucide icons, and colors specified: snippet, prompt, command, note, file, image, and link.
+- Map the specification to the existing schema: represent `isPro: false` through Free access without an entitled subscription; represent `isSystem: true` with a stable `systemKey` and no owner; map link to the `URL` system type and storage kind.
+- Create five demo-owned collections with the specified descriptions and 18 realistic sample items: **React Patterns** (3 TypeScript snippets), **AI Workflows** (3 prompts), **DevOps** (1 snippet, 1 command, 2 links), **Terminal Commands** (4 commands), and **Design Resources** (4 links).
+- Include useful sample content covering the requested topics and real documentation/resource URLs for all links.
+- Make the seed safe to rerun without duplicating demo records, preserve unrelated data, and verify the demo user's password hash, collection/item counts, type mappings, and ownership.
+
 ## History
+
+- 2026-11-05: Completed **Development and Demo Seed Data** on `feature/demo-seed`. Replaced the seed with transactional upserts for Demo User, seven system types with the specified icons/colors, five collections, and 18 sample items. Added `bcryptjs` password hashing with 12 rounds, current email verification, Free access without a subscription, stable fixture IDs, and checks that preserve unrelated owners and billing data. Added `prisma/seed-data.ts`, `npm run db:test:seed`, and updated development/production seed documentation. Seeded Neon and verified two seed runs preserve IDs/counts and unrelated records; final counts are one user, five demo collections, 18 items, and seven system types. Password, ownership, payload, and system metadata checks passed, along with lint, TypeScript, production build, migration status, and a headless Chrome dashboard render check. Dashboard remains mock-backed; no schema migration was needed.
+
+- 2026-11-05: Selected **Development and Demo Seed Data** as the current feature from [the seed specification](features/seed-spec.md). Status: In Progress. Replacing the existing seed file is authorized.
 
 - 2026-11-05: Archived **Prisma + Neon PostgreSQL Setup**. Status: Completed. Specification: [Database setup requirements](features/database-spec.md). Goals: set up Prisma 7 with Neon serverless PostgreSQL following the Prisma 7 guides; create the initial schema from the project overview with NextAuth models; add indexes and explicit deletion rules; separate Neon development and production branches; use versioned migrations, verify migration status, and deploy production migrations with `prisma migrate deploy`.
 

@@ -8,10 +8,14 @@ Use Node.js 22.12+ or 24 LTS and npm. Prisma CLI, client, and Neon adapter are p
 2. Create a development branch in your Neon project, separate from production.
 3. Copy `.env.example` to `.env` in the project root. Copy the development branch's pooled connection string into `DATABASE_URL` and its direct connection string into `DATABASE_URL_UNPOOLED`. Keep both on the same branch. Never commit credentials.
 4. Run `npm run db:migrate -- --name init` for a fresh setup, or `npm run db:migrate -- --name describe_change` after changing the schema. This creates/applies versioned SQL migrations; never use `db push` unless explicitly requested.
-5. Run `npm run db:generate` and `npm run db:seed` explicitly. Prisma 7 does not automatically generate the client or seed after `migrate dev`. The seed upserts all seven built-in item types and can be rerun safely.
+5. Run `npm run db:generate` and `npm run db:seed` explicitly. Prisma 7 does not automatically generate the client or seed after `migrate dev`. The development/demo seed upserts seven built-in item types, Demo User, five collections, and 18 sample items.
 6. Run `npm run db:status` before committing. Commit the schema and migration files together.
 
 Run `npm run db:check` after seeding to verify the Neon adapter, seeded types, item CRUD, collection deletion, and user cascades. Run `npm run db:test:relations` to verify SQL constraints and relation deletion behavior. Use an isolated development/test branch: both checks roll back their test records. Lint and build with `npm run lint` and `npm run build`.
+
+The demo account is `demo@devstash.io` with password `12345678` (stored as a bcrypt hash with 12 rounds) and a current verification date. It has Free access through the absence of a subscription. Global types use `systemKey` with no owner; the display name `link` maps to the `URL` system key. Demo fixtures intentionally include five collections despite the application's proposed three-collection Free quota; seeds do not go through application quota checks.
+
+Seed fixtures live in `prisma/seed-data.ts`. Reruns update the demo account's name, password, verification date, system type metadata, and known demo collections/items using stable IDs. They preserve unrelated records and stop if a fixture ID belongs to another user or the demo user already has billing data. Use this seed only for development/demo databases. Run `npm run db:test:seed` to execute the seed twice and verify password hashing, fixture counts, ownership, stable IDs, and unrelated data preservation; it removes its temporary verification user afterward and leaves the demo data installed.
 
 `migrate dev` uses a disposable shadow database to detect drift. If the Neon role cannot create databases, set `SHADOW_DATABASE_URL` to a separate disposable database's direct connection string. Never use the development or production database as the shadow database. If Prisma reports drift or asks to reset an existing database, investigate before accepting a reset.
 
@@ -23,7 +27,7 @@ The initial schema follows `context/project-overview.md`: users, items, types, c
 
 ## Production migrations
 
-Set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to the production branch only in the production environment. Run `npm run db:deploy` as a release step before starting the new application version, then `npm run db:seed` when initializing system types. Use `npm run build` to generate the client and build Next.js. Never run `migrate dev` against production. Development and production apply the same checked-in migration history.
+Set `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to the production branch only in the production environment. Run `npm run db:deploy` as a release step before starting the new application version. The current seed installs demo credentials and sample data, so production system-type initialization must use a separate production provisioning process. Use `npm run build` to generate the client and build Next.js. Never run `migrate dev` against production. Development and production apply the same checked-in migration history.
 
 References: [Prisma 7 upgrade guide](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7), [Neon and Prisma](https://neon.com/docs/guides/prisma), [Auth.js Prisma schema](https://authjs.dev/getting-started/adapters/prisma).
 
