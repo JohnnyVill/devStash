@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ContentKind {
+  TEXT
+  FILE
+  URL
+}
+
+enum SystemType {
+  SNIPPET
+  PROMPT
+  NOTE
+  COMMAND
+  FILE
+  IMAGE
+  URL
+}
+
+enum UploadStatus {
+  PENDING
+  READY
+  FAILED
+}
+
+model User {
+  id               String        @id @default(cuid())
+  name             String?
+  email            String        @unique
+  emailVerified    DateTime?
+  image            String?
+  passwordHash     String?
+  stripeCustomerId String?       @unique
+  items            Item[]
+  itemTypes        ItemType[]
+  collections      Collection[]
+  tags             Tag[]
+  subscription     Subscription?
+  accounts         Account[]
+  sessions         Session[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Item {
+  id          String    @id @default(cuid())
+  title       String
+  description String?   @db.Text
+  content     String?   @db.Text
+  url         String?   @db.Text
+  language    String?
+  aiSummary   String?   @db.Text
+  isFavorite  Boolean   @default(false)
+  isPinned    Boolean   @default(false)
+  lastUsedAt  DateTime?
+
+  // FILE items only; never persist an expiring signed URL.
+  storageKey    String?       @unique
+  fileName      String?
+  mimeType      String?
+  fileSizeBytes BigInt?
+  uploadStatus  UploadStatus?
+
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  typeId       String
+  type         ItemType    @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  tags         ItemTag[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([userId, updatedAt])
+  @@index([userId, typeId])
+  @@index([userId, collectionId])
+  @@index([userId, isFavorite])
+  @@index([userId, lastUsedAt])
+  @@index([typeId])
+  @@index([collectionId])
+}
+
+model ItemType {
+  id             String      @id @default(cuid())
+  name           String
+  normalizedName String
+  systemKey      SystemType? @unique
+  contentKind    ContentKind
+  icon           String?
+  color          String?
+  userId         String?
+  user           User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items          Item[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([userId, normalizedName])
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  isFavorite  Boolean  @default(false)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       Item[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, updatedAt])
+}
+
+model Tag {
+  id             String    @id @default(cuid())
+  name           String
+  normalizedName String
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items          ItemTag[]
+  createdAt      DateTime  @default(now())
+
+  @@unique([userId, normalizedName])
+}
+
+model ItemTag {
+  itemId String
+  tagId  String
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+  @@index([tagId])
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeSubscriptionId String    @unique
+  stripePriceId        String
+  // Keep provider status; map explicitly to application entitlements.
+  status               String
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model StripeWebhookEvent {
+  id          String   @id // Stripe event ID for deduplication
+  type        String
+  processedAt DateTime @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
