@@ -1,8 +1,8 @@
 ﻿# Current Feature
 
-## Dashboard Collections
+## Dashboard Items
 
-Specification: [Dashboard Collections Spec](features/dashboard-collections-spec.md).
+Specification: [Dashboard Items Spec](features/dashboard-items-spec.md).
 
 ## Status
 
@@ -10,15 +10,19 @@ Completed
 
 ## Goals
 
-- Replace mock collection data in the dashboard main area with actual Neon database data using Prisma.
-- Create `src/lib/db/collections.ts` with collection data fetching functions and fetch collections directly in a Server Component.
-- Preserve the current design and six-card recent collections layout; reference `context/screenshots/dashboard-ui-main.png` if needed.
-- Derive each collection card's border color from its most-used content type.
-- Show small icons for all content types present in each collection.
-- Update the collection stats display to use database data.
-- Defer the items underneath the collections to a later feature.
+- Replace mock pinned and recent item data in the dashboard main area with actual Neon database data using Prisma.
+- Create `src/lib/db/items.ts` with item data fetching functions and fetch items directly in a Server Component.
+- Hide the pinned items section entirely when there are no pinned items.
+- Derive each item card's icon and border from its item type.
+- Display item type tags and the other details currently shown on item cards.
+- Preserve the current layout and design; reference `context/screenshots/dashboard-ui-main.png` if needed.
+- Update the collection stats display as required by the specification.
 
 ## History
+
+- 2026-11-10: Completed **Dashboard Items** on `feature/dashboard-items`. Added server-only `src/lib/db/items.ts` with an owner-scoped Prisma query for items, type metadata, and owner-scoped tags. The dashboard Server Component fetches Demo User items alongside the existing collection data and passes serialized records to the interactive dashboard. Restored pinned and up to 10 recently updated items, hid empty pinned sections, and added database type icons, border colors, and type badges while preserving tags, favorites, pin indicators, descriptions, and dates. Item totals and favorites now reflect database records; collection statistics remain database-backed. Retained client-side search across the full fetched workspace, filters, sorting, and grid/list views. Sidebar, profile, and separate type routes remain mock-backed pending later work. Lint, production build including TypeScript, read-only Neon ordering/ownership/serialization checks, temporary empty/pinned/tag render checks, and Chrome checks at 1440px, 390px, and 320px passed. No schema changes or persistent test fixtures were needed.
+
+- 2026-11-10: Selected **Dashboard Items** as the current feature from [the dashboard items specification](features/dashboard-items-spec.md). Status: In Progress.
 
 - 2026-11-10: Completed **Dashboard Collections** on `feature/dashboard-collections`. Added server-only Prisma collection queries scoped to a user, with up to six collections ordered by update time, grouped item/type counts, and total/favorite collection statistics. The dashboard Server Component fetches the seeded Demo User's collections at request time until authentication is implemented. Preserved the card grid, added dominant-type border colors and accessible type icons, and deferred the item sections underneath. The five seeded collections contain 18 items; the layout supports up to six cards without adding dummy records. Sidebar, profile, and item statistics remain mock-backed. Lint, production build (including TypeScript), read-only Neon count/type/empty-owner checks, and headless Chrome checks at 1440px, 390px, and 320px passed. No schema changes were needed.
 
