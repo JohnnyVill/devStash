@@ -1,8 +1,8 @@
 ﻿# Current Feature
 
-## Development and Demo Seed Data
+## Dashboard Collections
 
-Specification: [Seed data requirements](features/seed-spec.md).
+Specification: [Dashboard Collections Spec](features/dashboard-collections-spec.md).
 
 ## Status
 
@@ -10,15 +10,19 @@ Completed
 
 ## Goals
 
-- Replace `prisma/seed.ts` with a development/demo seed script following the specification, using Prisma 7 and dotenv for database configuration.
-- Create **Demo User** (`demo@devstash.io`) with password `12345678` hashed using `bcryptjs` with 12 rounds, the current date as `emailVerified`, and Free access.
-- Seed all seven system item types with the names, Lucide icons, and colors specified: snippet, prompt, command, note, file, image, and link.
-- Map the specification to the existing schema: represent `isPro: false` through Free access without an entitled subscription; represent `isSystem: true` with a stable `systemKey` and no owner; map link to the `URL` system type and storage kind.
-- Create five demo-owned collections with the specified descriptions and 18 realistic sample items: **React Patterns** (3 TypeScript snippets), **AI Workflows** (3 prompts), **DevOps** (1 snippet, 1 command, 2 links), **Terminal Commands** (4 commands), and **Design Resources** (4 links).
-- Include useful sample content covering the requested topics and real documentation/resource URLs for all links.
-- Make the seed safe to rerun without duplicating demo records, preserve unrelated data, and verify the demo user's password hash, collection/item counts, type mappings, and ownership.
+- Replace mock collection data in the dashboard main area with actual Neon database data using Prisma.
+- Create `src/lib/db/collections.ts` with collection data fetching functions and fetch collections directly in a Server Component.
+- Preserve the current design and six-card recent collections layout; reference `context/screenshots/dashboard-ui-main.png` if needed.
+- Derive each collection card's border color from its most-used content type.
+- Show small icons for all content types present in each collection.
+- Update the collection stats display to use database data.
+- Defer the items underneath the collections to a later feature.
 
 ## History
+
+- 2026-11-10: Completed **Dashboard Collections** on `feature/dashboard-collections`. Added server-only Prisma collection queries scoped to a user, with up to six collections ordered by update time, grouped item/type counts, and total/favorite collection statistics. The dashboard Server Component fetches the seeded Demo User's collections at request time until authentication is implemented. Preserved the card grid, added dominant-type border colors and accessible type icons, and deferred the item sections underneath. The five seeded collections contain 18 items; the layout supports up to six cards without adding dummy records. Sidebar, profile, and item statistics remain mock-backed. Lint, production build (including TypeScript), read-only Neon count/type/empty-owner checks, and headless Chrome checks at 1440px, 390px, and 320px passed. No schema changes were needed.
+
+- 2026-11-10: Selected **Dashboard Collections** as the current feature from [the dashboard collections specification](features/dashboard-collections-spec.md). Status: In Progress.
 
 - 2026-11-05: Completed **Development and Demo Seed Data** on `feature/demo-seed`. Replaced the seed with transactional upserts for Demo User, seven system types with the specified icons/colors, five collections, and 18 sample items. Added `bcryptjs` password hashing with 12 rounds, current email verification, Free access without a subscription, stable fixture IDs, and checks that preserve unrelated owners and billing data. Added `prisma/seed-data.ts`, `npm run db:test:seed`, and updated development/production seed documentation. Seeded Neon and verified two seed runs preserve IDs/counts and unrelated records; final counts are one user, five demo collections, 18 items, and seven system types. Password, ownership, payload, and system metadata checks passed, along with lint, TypeScript, production build, migration status, and a headless Chrome dashboard render check. Dashboard remains mock-backed; no schema migration was needed.
 

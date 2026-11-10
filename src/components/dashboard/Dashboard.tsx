@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Archive, Boxes, Clock3, Code2, File, Image, Inbox, LayoutGrid, Link2, List, PanelLeft, Pin, Plus, Search, Sparkles, Star, StickyNote, Terminal, X, type LucideIcon } from "lucide-react";
 import { Dialog } from "radix-ui";
 import Link from "next/link";
@@ -76,9 +76,13 @@ function RecentCollections({ onSelect }: RecentCollectionsProps) {
   );
 }
 
-interface DashboardProps { initialFilter?: string }
+interface DashboardProps {
+  initialFilter?: string;
+  collectionSection?: ReactNode;
+  collectionStats?: { total: number; favorites: number };
+}
 
-export function Dashboard({ initialFilter = "all" }: DashboardProps) {
+export function Dashboard({ initialFilter = "all", collectionSection, collectionStats }: DashboardProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -110,7 +114,7 @@ export function Dashboard({ initialFilter = "all" }: DashboardProps) {
     : visible;
   if (overview && sort === "title") displayed.sort((a, b) => a.title.localeCompare(b.title));
   const itemGrid = list ? "grid gap-3" : "grid gap-3 lg:grid-cols-2 xl:grid-cols-3";
-  const stats = [{ label: "Total items", value: ITEMS.length, icon: Boxes, caption: "In your workspace" }, { label: "Collections", value: COLLECTIONS.length, icon: Archive, caption: "Ideas, organized" }, { label: "Favorite items", value: ITEMS.filter(i => i.isFavorite).length, icon: Star, caption: "Always close at hand" }, { label: "Favorite collections", value: COLLECTIONS.filter(c => c.isFavorite).length, icon: Star, caption: "Your go-to collections" }];
+  const stats = [{ label: "Total items", value: ITEMS.length, icon: Boxes, caption: "In your workspace" }, { label: "Collections", value: collectionStats?.total ?? COLLECTIONS.length, icon: Archive, caption: "Ideas, organized" }, { label: "Favorite items", value: ITEMS.filter(i => i.isFavorite).length, icon: Star, caption: "Always close at hand" }, { label: "Favorite collections", value: collectionStats?.favorites ?? COLLECTIONS.filter(c => c.isFavorite).length, icon: Star, caption: "Your go-to collections" }];
   return <div className="flex min-h-dvh w-full min-w-0">
     <a href="#main-content" className="sr-only z-50 rounded bg-primary p-3 focus:not-sr-only focus:fixed">Skip to main content</a>
     {!collapsed && <aside id="desktop-sidebar" className="sticky top-0 hidden h-dvh w-60 shrink-0 border-r bg-sidebar md:block"><Sidebar filter={filter} onSelect={select} /></aside>}
@@ -124,17 +128,17 @@ export function Dashboard({ initialFilter = "all" }: DashboardProps) {
         <div className="flex flex-wrap items-end justify-between gap-5"><div><p className="mb-3 text-[10px] font-medium tracking-[0.2em] text-violet-400 uppercase">Your workspace</p><h1 className="text-2xl font-semibold tracking-tight">Welcome back, {CURRENT_USER.name.split(" ")[0]}.</h1><p className="mt-2 text-xs text-muted-foreground">Keep your best ideas close at hand.</p></div><Button disabled title="Item creation is coming in a later phase"><Plus />New item</Button></div>
         <div className="mt-8 grid grid-cols-2 gap-3 xl:grid-cols-4">{stats.map(stat => <div key={stat.label} className="rounded-xl border bg-sidebar p-4"><div className="flex items-center justify-between text-[11px] text-muted-foreground">{stat.label}<stat.icon className="size-4" /></div><p className="mt-4 text-xl font-semibold">{stat.value}</p><p className="mt-1 text-[10px] text-muted-foreground">{stat.caption}</p></div>)}</div>
         {overview && <>
-          <RecentCollections onSelect={select} />
-          <section className="mt-9" aria-labelledby="pinned-heading">
+          {collectionSection ?? <RecentCollections onSelect={select} />}
+          {!collectionSection && <section className="mt-9" aria-labelledby="pinned-heading">
             <h2 id="pinned-heading" className="mb-4 flex items-center gap-2 text-sm font-semibold"><Pin aria-hidden="true" className="size-4 text-violet-400" />Pinned items</h2>
             <div className={itemGrid}>{pinned.map(item => <ItemCard key={item.id} item={item} />)}</div>
             {!pinned.length && <p className="rounded-xl border border-dashed p-6 text-xs text-muted-foreground">Pinned items will appear here for quick access.</p>}
-          </section>
+          </section>}
         </>}
-        <section className="mt-9" aria-labelledby="items-heading"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 id="items-heading" className="text-sm font-semibold">{overview ? "Recent items" : heading}</h2><p aria-live="polite" className="mt-1 text-[11px] text-muted-foreground">{displayed.length} {displayed.length === 1 ? "item" : "items"}{overview ? " - Most recently updated, up to 10" : " in your workspace"}</p></div><div className="flex items-center gap-2"><select aria-label="Sort items" value={sort} onChange={e => setSort(e.target.value)} className="h-8 rounded-lg border bg-sidebar px-2 text-[11px] text-muted-foreground"><option value="updated">Recently updated</option><option value="title">Title A–Z</option></select><div className="flex rounded-lg border p-0.5"><Button variant={list ? "ghost" : "secondary"} size="icon-sm" aria-label="Grid view" aria-pressed={!list} onClick={() => setList(false)}><LayoutGrid /></Button><Button variant={list ? "secondary" : "ghost"} size="icon-sm" aria-label="List view" aria-pressed={list} onClick={() => setList(true)}><List /></Button></div></div></div>
+        {(!collectionSection || !overview) && <section className="mt-9" aria-labelledby="items-heading"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 id="items-heading" className="text-sm font-semibold">{overview ? "Recent items" : heading}</h2><p aria-live="polite" className="mt-1 text-[11px] text-muted-foreground">{displayed.length} {displayed.length === 1 ? "item" : "items"}{overview ? " - Most recently updated, up to 10" : " in your workspace"}</p></div><div className="flex items-center gap-2"><select aria-label="Sort items" value={sort} onChange={e => setSort(e.target.value)} className="h-8 rounded-lg border bg-sidebar px-2 text-[11px] text-muted-foreground"><option value="updated">Recently updated</option><option value="title">Title A–Z</option></select><div className="flex rounded-lg border p-0.5"><Button variant={list ? "ghost" : "secondary"} size="icon-sm" aria-label="Grid view" aria-pressed={!list} onClick={() => setList(false)}><LayoutGrid /></Button><Button variant={list ? "secondary" : "ghost"} size="icon-sm" aria-label="List view" aria-pressed={list} onClick={() => setList(true)}><List /></Button></div></div></div>
           <div className={itemGrid}>{displayed.map(item => <ItemCard key={item.id} item={item} />)}</div>
           {!visible.length && <div className="rounded-xl border border-dashed py-16 text-center"><Search className="mx-auto mb-3 size-6 text-muted-foreground" /><h3 className="text-sm font-medium">No items found</h3><p className="mt-2 text-xs text-muted-foreground">Try another search or choose a different collection.</p></div>}
-        </section>
+        </section>}
         <div className="mt-8 flex items-center gap-4 rounded-xl border border-violet-400/20 bg-violet-400/5 p-5"><Sparkles className="size-5 shrink-0 text-violet-400" /><div><h2 className="text-xs font-semibold">Make your stash work for you</h2><p className="mt-1 text-[11px] text-muted-foreground">Save a snippet, prompt, or note to start building your personal knowledge hub.</p></div></div>
       </main>
     </div>
